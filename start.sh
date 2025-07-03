@@ -1,0 +1,29 @@
+#!/bin/bash
+
+# Generate a fixed random port between 8000-9000
+if [ -z "$PORT" ]; then
+    export PORT=$((8000 + RANDOM % 1000))
+fi
+
+echo "Starting TODO App on port $PORT"
+
+# Check if docker-compose or docker compose is available
+if command -v docker-compose &> /dev/null; then
+    DOCKER_COMPOSE_CMD="docker-compose"
+elif docker compose version &> /dev/null; then
+    DOCKER_COMPOSE_CMD="docker compose"
+else
+    echo "Error: Neither 'docker-compose' nor 'docker compose' is available"
+    exit 1
+fi
+
+echo "Using $DOCKER_COMPOSE_CMD"
+
+# Stop any existing containers
+$DOCKER_COMPOSE_CMD down
+
+# Build and run the container in detached mode
+$DOCKER_COMPOSE_CMD up -d --build
+
+echo "TODO App is running on http://localhost:$PORT"
+echo "To stop the app, run: $DOCKER_COMPOSE_CMD down"

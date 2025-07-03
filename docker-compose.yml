@@ -1,0 +1,6 @@
+services:
+  todo-app:
+    build: .
+    ports:
+      - "${PORT:-8080}:80"
+    container_name: todo-app-container
