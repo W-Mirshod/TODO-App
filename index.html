@@ -7,23 +7,63 @@
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <div class="container">
-        <h1>TODO App</h1>
-        <div class="todo-input">
-            <input type="text" id="todoInput" placeholder="Add a new task..." maxlength="100">
-            <button id="addBtn">Add</button>
+    <nav class="navbar">
+        <div class="navbar-content" style="display: flex; align-items: center; justify-content: space-between; width: 100%; max-width: 900px; margin: 0 auto;">
+            <span class="navbar-title">W-Mirshod, ToDo App</span>
+            <label class="dark-mode-switch">
+                <input type="checkbox" id="darkModeToggle">
+                <span class="dark-mode-slider"></span>
+                <span class="switch-label">Dark Mode</span>
+            </label>
         </div>
-        <div class="filter-buttons">
-            <button id="showAll" class="active">All</button>
-            <button id="showActive">Active</button>
-            <button id="showCompleted">Completed</button>
-        </div>
-        <ul id="todoList" class="todo-list"></ul>
-        <div class="todo-footer">
-            <span id="itemCount">0 items left</span>
-            <button id="clearCompleted">Clear Completed</button>
+    </nav>
+    <div class="main-content">
+        <div class="container">
+            <h1>TODO App</h1>
+            <div class="todo-input">
+                <input type="text" id="todoInput" placeholder="Add a new task..." maxlength="100">
+                <button id="addBtn">Add</button>
+            </div>
+            <div class="filter-buttons">
+                <button id="showAll" class="active">All</button>
+                <button id="showActive">Active</button>
+                <button id="showCompleted">Completed</button>
+            </div>
+            <ul id="todoList" class="todo-list"></ul>
+            <div class="todo-footer">
+                <span id="itemCount">0 items left</span>
+                <button id="clearCompleted">Clear Completed</button>
+            </div>
         </div>
     </div>
     <script src="script.js"></script>
+    <script>
+    const darkModeToggle = document.getElementById('darkModeToggle');
+    if (darkModeToggle) {
+        if (localStorage.getItem('darkMode') === 'true') {
+            document.body.classList.add('dark-mode');
+            darkModeToggle.checked = true;
+        }
+        darkModeToggle.addEventListener('change', () => {
+            document.body.classList.toggle('dark-mode');
+            localStorage.setItem('darkMode', document.body.classList.contains('dark-mode'));
+        });
+    }
+    </script>
+    <div class="floating-features" id="featuresBtn">&#9881;</div>
+    <div class="features-modal" id="featuresModal">
+        <div class="features-content">
+            <h2>Features</h2>
+            <ul>
+                <li>Add, edit, delete tasks</li>
+                <li>Mark tasks as completed</li>
+                <li>Filter: All, Active, Completed</li>
+                <li>Clear completed tasks</li>
+                <li>Tasks saved in browser</li>
+                <li>Inline editing (double-click task)</li>
+            </ul>
+            <button id="closeFeatures">Close</button>
+        </div>
+    </div>
 </body>
 </html>

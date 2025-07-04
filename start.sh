@@ -1,9 +1,7 @@
 #!/bin/bash
 
-# Generate a fixed random port between 8000-9000
-if [ -z "$PORT" ]; then
-    export PORT=$((8000 + RANDOM % 1000))
-fi
+# Set a fixed port
+export PORT=10100
 
 echo "Starting TODO App on port $PORT"
 

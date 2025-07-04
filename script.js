@@ -99,40 +99,59 @@ class TodoApp {
 
     render() {
         const filteredTodos = this.getFilteredTodos();
-        
         this.todoList.innerHTML = '';
-
         if (filteredTodos.length === 0) {
             const emptyDiv = document.createElement('div');
             emptyDiv.className = 'empty-state';
-            emptyDiv.textContent = this.todos.length === 0 ? 
-                'No todos yet. Add one above!' : 
-                `No ${this.filter} todos.`;
+            emptyDiv.textContent = this.todos.length === 0 ? 'No todos yet. Add one above!' : `No ${this.filter} todos.`;
             this.todoList.appendChild(emptyDiv);
         } else {
             filteredTodos.forEach(todo => {
                 const li = document.createElement('li');
-                li.className = `todo-item ${todo.completed ? 'completed' : ''}`;
-                
+                li.className = `todo-item${todo.completed ? ' completed' : ''}`;
+                li.dataset.id = todo.id;
                 li.innerHTML = `
                     <input type="checkbox" class="todo-checkbox" ${todo.completed ? 'checked' : ''}>
                     <span class="todo-text">${this.escapeHtml(todo.text)}</span>
                     <button class="delete-btn">Delete</button>
                 `;
-
                 const checkbox = li.querySelector('.todo-checkbox');
                 const deleteBtn = li.querySelector('.delete-btn');
-
+                const textSpan = li.querySelector('.todo-text');
                 checkbox.addEventListener('change', () => this.toggleTodo(todo.id));
                 deleteBtn.addEventListener('click', () => this.deleteTodo(todo.id));
-
+                textSpan.addEventListener('dblclick', (e) => this.startEditTodo(todo.id, textSpan));
                 this.todoList.appendChild(li);
             });
         }
-
-        // Update item count
         const activeCount = this.todos.filter(todo => !todo.completed).length;
         this.itemCount.textContent = `${activeCount} item${activeCount !== 1 ? 's' : ''} left`;
+    }
+
+    startEditTodo(id, textSpan) {
+        const todo = this.todos.find(t => t.id === id);
+        if (!todo) return;
+        const input = document.createElement('input');
+        input.type = 'text';
+        input.value = todo.text;
+        input.className = 'edit-todo-input';
+        input.maxLength = 100;
+        textSpan.replaceWith(input);
+        input.focus();
+        input.setSelectionRange(input.value.length, input.value.length);
+        const finish = () => {
+            const newText = input.value.trim();
+            if (newText && newText !== todo.text) {
+                todo.text = newText;
+                this.saveTodos();
+            }
+            this.render();
+        };
+        input.addEventListener('blur', finish);
+        input.addEventListener('keydown', e => {
+            if (e.key === 'Enter') finish();
+            if (e.key === 'Escape') this.render();
+        });
     }
 
     escapeHtml(text) {
@@ -149,4 +168,16 @@ class TodoApp {
 // Initialize the app when the DOM is loaded
 document.addEventListener('DOMContentLoaded', () => {
     new TodoApp();
+    const featuresBtn = document.getElementById('featuresBtn');
+    const featuresModal = document.getElementById('featuresModal');
+    const closeFeatures = document.getElementById('closeFeatures');
+    featuresBtn.addEventListener('click', () => {
+        featuresModal.classList.add('active');
+    });
+    closeFeatures.addEventListener('click', () => {
+        featuresModal.classList.remove('active');
+    });
+    featuresModal.addEventListener('click', e => {
+        if (e.target === featuresModal) featuresModal.classList.remove('active');
+    });
 });
