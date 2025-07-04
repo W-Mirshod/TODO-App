@@ -1,12 +1,14 @@
 body.dark-mode {
     background: linear-gradient(135deg, #232526 0%, #414345 100%);
     color: #e0e0e0;
+    transition: background 0.4s;
 }
 
 .dark-mode .container {
     background: #232526;
     color: #e0e0e0;
     box-shadow: 0 15px 35px rgba(0,0,0,0.4);
+    transition: background 0.3s, box-shadow 0.3s;
 }
 
 .dark-mode .navbar {
@@ -75,6 +77,16 @@ body.dark-mode {
 
 .dark-mode .features-modal {
     background: rgba(0,0,0,0.6);
+    opacity: 0;
+    pointer-events: none;
+    transform: scale(0.95);
+    transition: opacity 0.25s, transform 0.25s;
+}
+
+.dark-mode .features-modal.active {
+    opacity: 1;
+    pointer-events: auto;
+    transform: scale(1);
 }
 
 .dark-mode .navbar-title {
@@ -307,9 +319,16 @@ body.dark-mode {
     z-index: 2000;
     align-items: center;
     justify-content: center;
+    opacity: 0;
+    pointer-events: none;
+    transform: scale(0.95);
+    transition: opacity 0.25s, transform 0.25s;
 }
 .features-modal.active {
     display: flex;
+    opacity: 1;
+    pointer-events: auto;
+    transform: scale(1);
 }
 .features-content {
     background: #fff;
@@ -361,7 +380,6 @@ body {
     padding: 0;
 }
 
-    
 .main-content {
     display: flex;
     align-items: center;
@@ -452,6 +470,7 @@ h1 {
     list-style: none;
     margin-bottom: 20px;
     min-height: 200px;
+    transition: all 0.3s cubic-bezier(0.4,0,0.2,1);
 }
 
 .todo-item {
@@ -459,11 +478,31 @@ h1 {
     align-items: center;
     padding: 15px;
     border-bottom: 1px solid #f0f0f0;
-    transition: background 0.3s;
+    transition: opacity 0.25s, transform 0.25s;
+    opacity: 1;
+    transform: translateY(0);
 }
 
 .todo-item:hover {
     background: #f8f9fa;
+}
+
+.todo-item.removing {
+    opacity: 0;
+    transform: translateY(30px);
+}
+
+.todo-item.adding {
+    opacity: 0;
+    transform: translateY(-30px);
+    animation: todoFadeIn 0.3s forwards;
+}
+
+@keyframes todoFadeIn {
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
 }
 
 .todo-item.completed {
@@ -550,6 +589,7 @@ h1 {
     margin-left: 16px;
     cursor: pointer;
     user-select: none;
+    transition: background 0.3s;
 }
 .dark-mode-switch input {
     display: none;
@@ -588,6 +628,14 @@ h1 {
 }
 .dark-mode .dark-mode-switch .switch-label {
     color: #e0e0e0;
+}
+
+.todo-item.dragging {
+    opacity: 0.5;
+}
+.todo-item.drag-over {
+    background: #e0e7ff;
+    border-radius: 6px;
 }
 
 @media (max-width: 768px) {

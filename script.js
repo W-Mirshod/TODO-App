@@ -2,6 +2,7 @@ class TodoApp {
     constructor() {
         this.todos = JSON.parse(localStorage.getItem('todos')) || [];
         this.filter = 'all';
+        this.draggedId = null;
         this.init();
     }
 
@@ -36,24 +37,38 @@ class TodoApp {
     addTodo() {
         const text = this.todoInput.value.trim();
         if (!text) return;
-
         const todo = {
             id: Date.now(),
             text: text,
             completed: false,
             createdAt: new Date().toISOString()
         };
-
         this.todos.push(todo);
-        this.todoInput.value = '';
         this.saveTodos();
-        this.render();
+        this.todoInput.value = '';
+        this.render(() => {
+            const li = this.todoList.querySelector('li[data-id="' + todo.id + '"]');
+            if (li) {
+                li.classList.add('adding');
+                setTimeout(() => li.classList.remove('adding'), 300);
+            }
+        });
     }
 
     deleteTodo(id) {
-        this.todos = this.todos.filter(todo => todo.id !== id);
-        this.saveTodos();
-        this.render();
+        const li = this.todoList.querySelector('li[data-id="' + id + '"]');
+        if (li) {
+            li.classList.add('removing');
+            setTimeout(() => {
+                this.todos = this.todos.filter(t => t.id !== id);
+                this.saveTodos();
+                this.render();
+            }, 250);
+        } else {
+            this.todos = this.todos.filter(t => t.id !== id);
+            this.saveTodos();
+            this.render();
+        }
     }
 
     toggleTodo(id) {
@@ -97,19 +112,20 @@ class TodoApp {
         }
     }
 
-    render() {
-        const filteredTodos = this.getFilteredTodos();
+    render(cb) {
         this.todoList.innerHTML = '';
+        const filteredTodos = this.getFilteredTodos();
         if (filteredTodos.length === 0) {
-            const emptyDiv = document.createElement('div');
-            emptyDiv.className = 'empty-state';
-            emptyDiv.textContent = this.todos.length === 0 ? 'No todos yet. Add one above!' : `No ${this.filter} todos.`;
-            this.todoList.appendChild(emptyDiv);
+            const empty = document.createElement('li');
+            empty.className = 'empty-state';
+            empty.textContent = 'No tasks';
+            this.todoList.appendChild(empty);
         } else {
             filteredTodos.forEach(todo => {
                 const li = document.createElement('li');
-                li.className = `todo-item${todo.completed ? ' completed' : ''}`;
-                li.dataset.id = todo.id;
+                li.className = 'todo-item' + (todo.completed ? ' completed' : '');
+                li.setAttribute('data-id', todo.id);
+                li.setAttribute('draggable', 'true');
                 li.innerHTML = `
                     <input type="checkbox" class="todo-checkbox" ${todo.completed ? 'checked' : ''}>
                     <span class="todo-text">${this.escapeHtml(todo.text)}</span>
@@ -121,11 +137,45 @@ class TodoApp {
                 checkbox.addEventListener('change', () => this.toggleTodo(todo.id));
                 deleteBtn.addEventListener('click', () => this.deleteTodo(todo.id));
                 textSpan.addEventListener('dblclick', (e) => this.startEditTodo(todo.id, textSpan));
+                // Drag events
+                li.addEventListener('dragstart', e => {
+                    this.draggedId = todo.id;
+                    li.classList.add('dragging');
+                });
+                li.addEventListener('dragend', e => {
+                    this.draggedId = null;
+                    li.classList.remove('dragging');
+                });
+                li.addEventListener('dragover', e => {
+                    e.preventDefault();
+                    li.classList.add('drag-over');
+                });
+                li.addEventListener('dragleave', e => {
+                    li.classList.remove('drag-over');
+                });
+                li.addEventListener('drop', e => {
+                    e.preventDefault();
+                    li.classList.remove('drag-over');
+                    if (this.draggedId && this.draggedId !== todo.id) {
+                        this.moveTodo(this.draggedId, todo.id);
+                    }
+                });
                 this.todoList.appendChild(li);
             });
         }
         const activeCount = this.todos.filter(todo => !todo.completed).length;
         this.itemCount.textContent = `${activeCount} item${activeCount !== 1 ? 's' : ''} left`;
+        if (cb) cb();
+    }
+
+    moveTodo(draggedId, targetId) {
+        const fromIdx = this.todos.findIndex(t => t.id === draggedId);
+        const toIdx = this.todos.findIndex(t => t.id === targetId);
+        if (fromIdx === -1 || toIdx === -1) return;
+        const [moved] = this.todos.splice(fromIdx, 1);
+        this.todos.splice(toIdx, 0, moved);
+        this.saveTodos();
+        this.render();
     }
 
     startEditTodo(id, textSpan) {
