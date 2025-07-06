@@ -1,9 +1,6 @@
 #!/bin/bash
 
-# Set a fixed port
-export PORT=51000
-
-echo "Starting TODO App on port $PORT"
+echo "Starting TODO App"
 
 # Check if docker-compose or docker compose is available
 if command -v docker-compose &> /dev/null; then
@@ -23,5 +20,4 @@ $DOCKER_COMPOSE_CMD down
 # Build and run the container in detached mode
 $DOCKER_COMPOSE_CMD up -d --build
 
-echo "TODO App is running on http://localhost:$PORT"
 echo "To stop the app, run: $DOCKER_COMPOSE_CMD down"
