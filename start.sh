@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Set a fixed port
-export PORT=10100
+export PORT=51000
 
 echo "Starting TODO App on port $PORT"
 
